@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/kris-nova/tgik-example-3:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/kris-nova/tgik-example-3:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: tgik-example-3
+        chartPath: charts/tgik-example-3
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/kris-nova/tgik-example-3'
+          image.tag: '{{.DIGEST_HEX}}'
